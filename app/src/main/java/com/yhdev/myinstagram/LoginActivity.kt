@@ -39,6 +39,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         auth = FirebaseAuth.getInstance()
+
         findViewById<android.widget.Button>(R.id.email_login_button).setOnClickListener {
             signinAndSignup()
         }
