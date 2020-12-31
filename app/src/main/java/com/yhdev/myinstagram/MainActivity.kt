@@ -1,13 +1,15 @@
 package com.yhdev.myinstagram
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.yhdev.myinstagram.navigation.AlarmFragment
-import com.yhdev.myinstagram.navigation.DetailViewFragment
-import com.yhdev.myinstagram.navigation.GridFragment
-import com.yhdev.myinstagram.navigation.UserFragment
+import com.yhdev.myinstagram.navigation.*
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -23,6 +25,9 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 return true;
             }
             R.id.action_add_photo -> {
+                if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    startActivity(Intent(this, AddPhotoActivity::class.java))
+                }
                 return true;
             }
             R.id.action_favorite_alarm -> {
@@ -43,6 +48,6 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         findViewById<BottomNavigationView>(R.id.bottom_navigation).setOnNavigationItemSelectedListener(this)
-
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
     }
 }
