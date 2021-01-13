@@ -17,28 +17,28 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             R.id.action_home -> {
                 var detailViewFragment = DetailViewFragment()
                 supportFragmentManager.beginTransaction().replace(R.id.main_content, detailViewFragment).commit()
-                return true;
+                return true
             }
             R.id.action_search -> {
                 var gridFragment = GridFragment()
                 supportFragmentManager.beginTransaction().replace(R.id.main_content, gridFragment).commit()
-                return true;
+                return true
             }
             R.id.action_add_photo -> {
                 if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     startActivity(Intent(this, AddPhotoActivity::class.java))
                 }
-                return true;
+                return true
             }
             R.id.action_favorite_alarm -> {
                 var alarmFragment = AlarmFragment()
                 supportFragmentManager.beginTransaction().replace(R.id.main_content, alarmFragment).commit()
-                return true;
+                return true
             }
             R.id.action_account -> {
                 var userFragment = UserFragment()
                 supportFragmentManager.beginTransaction().replace(R.id.main_content, userFragment).commit()
-                return true;
+                return true
             }
         }
         return false;
@@ -49,5 +49,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         setContentView(R.layout.activity_main)
         findViewById<BottomNavigationView>(R.id.bottom_navigation).setOnNavigationItemSelectedListener(this)
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+
+        // Set default screen
+        findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId = R.id.action_home
     }
 }

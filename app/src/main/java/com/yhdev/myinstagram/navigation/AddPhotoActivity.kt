@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
@@ -86,6 +87,9 @@ class AddPhotoActivity : AppCompatActivity() {
                 contentDTO.timestamp = System.currentTimeMillis()
 
                 firestore?.collection("images")?.document()?.set(contentDTO)
+                    ?.addOnFailureListener { exception -> Log.e("APP", exception.message!!) }
+
+
 
                 setResult(Activity.RESULT_OK)
 
