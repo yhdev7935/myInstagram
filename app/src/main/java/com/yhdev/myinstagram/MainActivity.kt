@@ -6,6 +6,10 @@ import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -14,6 +18,7 @@ import com.yhdev.myinstagram.navigation.*
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        setToolbarDefault()
         when(item.itemId) {
             R.id.action_home -> {
                 var detailViewFragment = DetailViewFragment()
@@ -46,7 +51,13 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 return true
             }
         }
-        return false;
+        return false
+    }
+
+    fun setToolbarDefault() {
+        findViewById<TextView>(R.id.toolbar_username).visibility = View.GONE
+        findViewById<ImageView>(R.id.toolbar_btn_back).visibility = View.GONE
+        findViewById<ImageView>(R.id.toolbar_title_image).visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
