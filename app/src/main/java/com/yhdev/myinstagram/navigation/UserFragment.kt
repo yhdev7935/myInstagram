@@ -1,6 +1,7 @@
 package com.yhdev.myinstagram.navigation
 
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.media.Image
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +25,7 @@ import com.yhdev.myinstagram.MainActivity
 import com.yhdev.myinstagram.R
 import com.yhdev.myinstagram.navigation.model.ContentDTO
 import com.yhdev.myinstagram.navigation.model.FollowDTO
+import org.w3c.dom.Text
 
 class UserFragment : Fragment() {
     var fragmentView: View? = null
@@ -87,7 +90,37 @@ class UserFragment : Fragment() {
             activity?.startActivityForResult(photoPickerIntent, PICK_PROFILE_FROM_ALBUM)
         }
         getProfileImage()
+        getFollowerAndFollowing()
         return fragmentView
+    }
+
+    fun getFollowerAndFollowing() {
+        firestore?.collection("users")?.document(uid!!)
+            ?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+                if (documentSnapshot == null) return@addSnapshotListener
+                var followDTO = documentSnapshot.toObject(FollowDTO::class.java)
+                if (followDTO?.followingCount != null) {
+                    fragmentView?.findViewById<TextView>(R.id.account_tv_following_count)?.text =
+                        followDTO?.followingCount?.toString()
+                }
+                if (followDTO?.followerCount != null) {
+                    fragmentView?.findViewById<TextView>(R.id.account_tv_follower_count)?.text =
+                        followDTO?.followerCount?.toString()
+                    if (followDTO?.followers?.containsKey(currentUserUid!!)) {
+                        fragmentView?.findViewById<Button>(R.id.account_btn_follow_signout)?.text =
+                            getString(R.string.follow_cancel)
+                        fragmentView?.findViewById<Button>(R.id.account_btn_follow_signout)?.background?.setColorFilter(
+                            ContextCompat.getColor(activity!!, R.color.colorLightGray),
+                            PorterDuff.Mode.MULTIPLY
+                        )
+                    } else if (uid != currentUserUid) {
+                        fragmentView?.findViewById<Button>(R.id.account_btn_follow_signout)?.text =
+                            getString(R.string.follow)
+                        fragmentView?.findViewById<Button>(R.id.account_btn_follow_signout)?.background?.colorFilter =
+                            null
+                    }
+                }
+            }
     }
 
     fun requestFollow() {
@@ -97,8 +130,8 @@ class UserFragment : Fragment() {
             if (followDTO == null) {
                 // 팔로우 버튼을 눌렀는데, 나의 정보가 없을 때
                 followDTO = FollowDTO()
-                followDTO!!.followerCount = 1
-                followDTO!!.followers[uid!!] = true
+                followDTO!!.followingCount = 1
+                followDTO!!.followings[uid!!] = true
 
                 transaction.set(tsDocFollowing, followDTO)
                 return@runTransaction
@@ -133,7 +166,7 @@ class UserFragment : Fragment() {
                 followDTO!!.followerCount = followDTO!!.followerCount - 1
                 followDTO!!.followers.remove(currentUserUid!!)
             } else {
-                followDTO!!.followerCount + followDTO!!.followerCount + 1
+                followDTO!!.followerCount = followDTO!!.followerCount + 1
                 followDTO!!.followers[currentUserUid!!] = true
             }
 

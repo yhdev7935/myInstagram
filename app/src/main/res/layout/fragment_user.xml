@@ -62,7 +62,7 @@
                     android:text="@string/follower" />
 
                 <TextView
-                    android:id="@+id/account_tv_follow_count"
+                    android:id="@+id/account_tv_follower_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/count_0" />
