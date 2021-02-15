@@ -23,6 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.yhdev.myinstagram.LoginActivity
 import com.yhdev.myinstagram.MainActivity
 import com.yhdev.myinstagram.R
+import com.yhdev.myinstagram.navigation.model.AlarmDTO
 import com.yhdev.myinstagram.navigation.model.ContentDTO
 import com.yhdev.myinstagram.navigation.model.FollowDTO
 import org.w3c.dom.Text
@@ -157,6 +158,7 @@ class UserFragment : Fragment() {
                 followDTO = FollowDTO()
                 followDTO!!.followerCount = 1
                 followDTO!!.followers[currentUserUid!!] = true
+                followerAlarm(uid!!)
 
                 transaction.set(tsDocFollower, followDTO!!)
                 return@runTransaction
@@ -168,6 +170,7 @@ class UserFragment : Fragment() {
             } else {
                 followDTO!!.followerCount = followDTO!!.followerCount + 1
                 followDTO!!.followers[currentUserUid!!] = true
+                followerAlarm(uid!!)
             }
 
             transaction.set(tsDocFollower, followDTO!!)
@@ -175,6 +178,15 @@ class UserFragment : Fragment() {
         }
     }
 
+    fun followerAlarm(destinationUid: String) {
+        var alarmDTO = AlarmDTO()
+        alarmDTO.destinationUid = destinationUid
+        alarmDTO.userId = auth?.currentUser?.email
+        alarmDTO.uid = auth?.currentUser?.uid
+        alarmDTO.kind = 2
+        alarmDTO.timestamp = System.currentTimeMillis()
+        FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
+    }
     fun getProfileImage() {
         firestore?.collection("profileImages")?.document(uid!!)
             ?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->

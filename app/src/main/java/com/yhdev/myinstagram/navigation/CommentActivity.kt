@@ -16,18 +16,22 @@ import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.yhdev.myinstagram.R
+import com.yhdev.myinstagram.navigation.model.AlarmDTO
 import com.yhdev.myinstagram.navigation.model.ContentDTO
 import org.w3c.dom.Text
 
 class CommentActivity : AppCompatActivity() {
     var contentUid: String? = null
+    var destinationUid: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comment)
         contentUid = intent.getStringExtra("contentUid")
+        destinationUid = intent.getStringExtra("destinationUid")
 
         findViewById<RecyclerView>(R.id.comment_recyclerview).adapter = CommentRecyclerviewAdapter()
-        findViewById<RecyclerView>(R.id.comment_recyclerview).layoutManager = LinearLayoutManager(this)
+        findViewById<RecyclerView>(R.id.comment_recyclerview).layoutManager =
+            LinearLayoutManager(this)
 
         findViewById<Button>(R.id.comment_btn_send)?.setOnClickListener {
             var comment = ContentDTO.Comment()
@@ -38,9 +42,24 @@ class CommentActivity : AppCompatActivity() {
 
             FirebaseFirestore.getInstance().collection("images").document(contentUid!!)
                 .collection("comments").document().set(comment)
+            commentAlarm(
+                destinationUid!!,
+                findViewById<EditText>(R.id.comment_edit_message).text.toString()
+            )
 
             findViewById<EditText>(R.id.comment_edit_message).setText("")
         }
+    }
+
+    fun commentAlarm(destinationUid: String, message: String) {
+        var alarmDTO = AlarmDTO()
+        alarmDTO.destinationUid = destinationUid
+        alarmDTO.userId = FirebaseAuth.getInstance().currentUser?.email
+        alarmDTO.uid = FirebaseAuth.getInstance().currentUser?.uid
+        alarmDTO.kind = 1
+        alarmDTO.timestamp = System.currentTimeMillis()
+        alarmDTO.message = message
+        FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
     }
 
     inner class CommentRecyclerviewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -82,9 +101,10 @@ class CommentActivity : AppCompatActivity() {
 
             FirebaseFirestore.getInstance().collection("profileImages")
                 .document(comments[position].uid!!).get().addOnCompleteListener { task ->
-                    if(task.isSuccessful) {
+                    if (task.isSuccessful) {
                         var url = task.result!!["image"]
-                        Glide.with(view.context).load(url).apply(RequestOptions().circleCrop()).into(view.findViewById(R.id.commentviewitem_imageview_profile))
+                        Glide.with(view.context).load(url).apply(RequestOptions().circleCrop())
+                            .into(view.findViewById(R.id.commentviewitem_imageview_profile))
                     }
                 }
         }

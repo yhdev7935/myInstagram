@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.yhdev.myinstagram.R
+import com.yhdev.myinstagram.navigation.model.AlarmDTO
 import com.yhdev.myinstagram.navigation.model.ContentDTO
 
 class DetailViewFragment : Fragment() {
@@ -44,13 +45,17 @@ class DetailViewFragment : Fragment() {
         init {
             firestore?.collection("images")?.orderBy("timestamp")
                 ?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    contentDTOs.clear()
-                    contentUidList.clear()
+                    var _contentDTOs: ArrayList<ContentDTO> = arrayListOf()
+                    var _contentUidList: ArrayList<String> = arrayListOf()
+                    if(querySnapshot == null) return@addSnapshotListener
                     for (snapshot in querySnapshot!!.documents) {
                         var item = snapshot.toObject(ContentDTO::class.java)
-                        contentDTOs.add(item!!)
-                        contentUidList.add(snapshot.id)
+                        _contentDTOs.add(item!!)
+                        _contentUidList.add(snapshot.id)
                     }
+
+                    contentDTOs.addAll(_contentDTOs)
+                    contentUidList.addAll(_contentUidList)
                     notifyDataSetChanged()
                 }
         }
@@ -121,6 +126,7 @@ class DetailViewFragment : Fragment() {
                 .setOnClickListener { v ->
                     var intent = Intent(v.context, CommentActivity::class.java)
                     intent.putExtra("contentUid", contentUidList[position])
+                    intent.putExtra("destinationUid", contentDTOs[position].uid)
                     startActivity(intent)
                 }
         }
@@ -139,9 +145,20 @@ class DetailViewFragment : Fragment() {
                     // When the Button isn't clicked
                     contentDTO?.favoriteCount = contentDTO?.favoriteCount + 1
                     contentDTO?.favorites[uid!!] = true
+                    favoriteAlarm(contentDTOs[position].uid!!)
                 }
                 transaction.set(tsDoc, contentDTO)
             }
+        }
+
+        fun favoriteAlarm(destinationUid : String) {
+            var alarmDTO = AlarmDTO()
+            alarmDTO.destinationUid = destinationUid
+            alarmDTO.userId = FirebaseAuth.getInstance().currentUser?.email
+            alarmDTO.uid = FirebaseAuth.getInstance().currentUser?.uid
+            alarmDTO.kind = 0
+            alarmDTO.timestamp = System.currentTimeMillis()
+            FirebaseFirestore.getInstance().collection("alarms").document().set(alarmDTO)
         }
     }
 }
